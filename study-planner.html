@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스터디 플래너 2026-2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\/script>
+<style>
+:root{--bg:#F7F4EE;--surface:#fff;--surface2:#F0EDE5;--border:#DDD8CC;--accent:#2C5F8A;--accent2:#C4873A;--accent3:#5A8A6A;--danger:#B85555;--text:#1E1A14;--text2:#5C5648;--text3:#9C9080;--radius:10px;--shadow:0 2px 12px rgba(44,40,30,.09)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Nanum Gothic",sans-serif;min-height:100vh}
+#cfg-modal{display:none;position:fixed;inset:0;background:rgba(30,26,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center}
+#cfg-modal.show{display:flex}
+.mbox{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:36px 40px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.mbox h2{font-size:1.2rem;font-weight:800;color:var(--accent);margin-bottom:6px}
+.mbox p{font-size:.82rem;color:var(--text2);margin-bottom:22px}
+.mbox label{display:block;font-size:.8rem;color:var(--text2);margin-bottom:5px;margin-top:14px}
+.mbox input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;font-family:"DM Mono",monospace;background:var(--bg);color:var(--text);outline:none}
+.mbox input:focus{border-color:var(--accent)}
+.mbtn{margin-top:24px;width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-family:"Nanum Gothic",sans-serif;font-weight:800;cursor:pointer}
+.mbtn:hover{background:#1e4a6e}
+.mskip{margin-top:10px;width:100%;padding:9px;background:transparent;color:var(--text3);border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;cursor:pointer;font-family:"Nanum Gothic",sans-serif}
+header{position:sticky;top:0;z-index:100;background:rgba(247,244,238,.92);backdrop-filter:blur(12px);border-bottom:1.5px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:58px}
+.logo{font-family:"Playfair Display",serif;font-size:1.35rem;color:var(--accent)}
+.logo span{color:var(--accent2)}
+nav{display:flex;gap:6px}
+.nb{padding:7px 18px;border-radius:20px;border:1.5px solid transparent;font-family:"Nanum Gothic",sans-serif;font-size:.85rem;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s}
+.nb.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nb:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+.hdr{display:flex;align-items:center;gap:10px}
+.syncst{font-size:.75rem;color:var(--text3);font-family:"DM Mono",monospace;display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3)}
+.dot.ok{background:var(--accent3)}
+.dot.err{background:var(--danger)}
+.setbtn{width:32px;height:32px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--surface);color:var(--text2);font-size:1rem;display:flex;align-items:center;justify-content:center}
+.page{display:none;padding:32px;max-width:1200px;margin:0 auto}
+.page.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ph{margin-bottom:28px}
+.ph h1{font-size:1.8rem;font-weight:800;color:var(--text)}
+.ph p{font-size:.85rem;color:var(--text3);margin-top:4px}
+.ybar{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.ybar select{padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:"Nanum Gothic",sans-serif;background:var(--surface);color:var(--text);cursor:pointer;outline:none}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.mc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);transition:border-color .2s}
+.mc:hover{border-color:var(--accent)}
+.mc.cur{border-color:var(--accent);border-width:2px}
+.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mn{font-size:1rem;font-weight:800;color:var(--accent)}
+.mbadge{font-size:.7rem;font-family:"DM Mono",monospace;background:var(--accent2);color:#fff;padding:2px 7px;border-radius:10px}
+.glist{display:flex;flex-direction:column;gap:7px}
+.gi{display:flex;align-items:flex-start;gap:8px}
+.gck{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;-webkit-appearance:none;appearance:none;background:var(--bg)}
+.gck:checked{background:var(--accent3);border-color:var(--accent3);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
+.gt{flex:1;font-size:.83rem;color:var(--text);line-height:1.5;border:none;background:transparent;font-family:"Nanum Gothic",sans-serif;resize:none;outline:none;min-height:20px}
+.gt.done{text-decoration:line-through;color:var(--text3)}
+.addbtn{display:flex;align-items:center;gap:5px;padding:5px 0;font-size:.78rem;color:var(--text3);cursor:pointer;border:none;background:transparent;font-family:"Nanum Gothic",sans-serif;margin-top:8px}
+.addbtn:hover{color:var(--accent)}
+.mnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.mnote textarea{width:100%;font-size:.78rem;color:var(--text2);border:none;background:transparent;resize:none;font-family:"Nanum Gothic",sans-serif;outline:none;line-height:1.5;min-height:36px}
+.mnote textarea::placeholder{color:var(--text3)}
+.mprog{height:3px;background:var(--surface2);border-radius:2px;margin-top:10px;overflow:hidden}
+.mpbar{height:100%;background:var(--accent3);border-radius:2px;transition:width .4s ease}
+.dbtn{width:22px;height:22px;border-radius:4px;border:none;background:var(--surface2);color:var(--text3);cursor:pointer;font-size:.8rem;flex-shrink:0}
+.dbtn:hover{background:#fde8e8;color:var(--danger)}
+.emeta{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.emc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.elabel{font-size:.72rem;color:var(--text3);margin-bottom:5px;font-family:"DM Mono",monospace}
+.eval{font-size:1.5rem;font-weight:800;color:var(--accent);font-family:"Playfair Display",serif}
+.eval.warn{color:var(--accent2)}
+.eval.ok{color:var(--accent3)}
+.esub{font-size:.75rem;color:var(--text3);margin-top:3px}
+.tlhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.tlhdr h2{font-size:1.1rem;font-weight:800;color:var(--text)}
+.apbtn{padding:7px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-family:"Nanum Gothic",sans-serif;font-weight:700}
+.apbtn:hover{background:#1e4a6e}
+.tlwrap{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:24px;overflow-x:auto}
+.ruler{display:flex;border-bottom:2px solid var(--border);padding-bottom:8px;margin-bottom:6px;min-width:700px}
+.rc{flex:1;text-align:center;font-size:.72rem;color:var(--text3);font-family:"DM Mono",monospace;padding:0 2px}
+.rc.cur{color:var(--accent);font-weight:700}
+.rc.exam{color:var(--danger);font-weight:700}
+.brow{display:flex;align-items:center;gap:12px;margin-bottom:5px;min-width:700px}
+.plbl{width:130px;flex-shrink:0;font-size:.78rem;color:var(--text2);text-align:right}
+.btrack{flex:1;height:28px;background:var(--surface2);border-radius:6px;position:relative;overflow:hidden}
+.bfill{position:absolute;top:0;height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:.72rem;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;font-family:"Nanum Gothic",sans-serif}
+.todayline{position:absolute;top:-4px;width:2px;background:var(--danger);z-index:10;height:calc(100% + 8px);pointer-events:none}
+.todaylbl{position:absolute;top:-20px;font-size:.65rem;color:var(--danger);font-family:"DM Mono",monospace;transform:translateX(-50%);white-space:nowrap}
+#pm-modal{display:none;position:fixed;inset:0;background:rgba(30,26,20,.5);backdrop-filter:blur(3px);z-index:500;align-items:center;justify-content:center}
+#pm-modal.show{display:flex}
+.pmbox{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:28px 32px;width:380px;box-shadow:0 16px 50px rgba(0,0,0,.15)}
+.pmbox h3{font-size:1rem;font-weight:800;margin-bottom:18px}
+.pmf{margin-bottom:14px}
+.pmf label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:5px}
+.pmf input{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:.85rem;font-family:"Nanum Gothic",sans-serif;background:var(--bg);color:var(--text);outline:none}
+.pmf input[type=color]{padding:3px 6px;height:36px;cursor:pointer}
+.pmbtns{display:flex;gap:8px;margin-top:20px}
+.pmok{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.88rem;cursor:pointer;font-family:"Nanum Gothic",sans-serif;font-weight:700}
+.pmcancel{flex:1;padding:10px;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;cursor:pointer;font-family:"Nanum Gothic",sans-serif}
+.wsec h2{font-size:1.1rem;font-weight:800;margin-bottom:16px}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.wc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.wc.tw{border-color:var(--accent);border-width:2px}
+.wch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.wct{font-size:.85rem;font-weight:800;color:var(--text)}
+.wcd{font-size:.7rem;color:var(--text3);font-family:"DM Mono",monospace}
+.wtlist{display:flex;flex-direction:column;gap:6px}
+.wti{display:flex;align-items:flex-start;gap:7px}
+.tck{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;-webkit-appearance:none;appearance:none;background:var(--bg)}
+.tck:checked{background:var(--accent);border-color:var(--accent);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
+.tt{flex:1;font-size:.8rem;color:var(--text);line-height:1.5;border:none;background:transparent;font-family:"Nanum Gothic",sans-serif;resize:none;outline:none}
+.tt.done{text-decoration:line-through;color:var(--text3)}
+.waddbtn{display:flex;align-items:center;gap:4px;padding:4px 0;font-size:.75rem;color:var(--text3);cursor:pointer;border:none;background:transparent;font-family:"Nanum Gothic",sans-serif;margin-top:6px}
+.waddbtn:hover{color:var(--accent)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 20px;border-radius:8px;font-size:.82rem;font-family:"DM Mono",monospace;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+@media(max-width:900px){.mgrid{grid-template-columns:repeat(2,1fr)}.emeta{grid-template-columns:repeat(2,1fr)}.wgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.mgrid{grid-template-columns:1fr}.wgrid{grid-template-columns:1fr}.page{padding:16px}header{padding:0 16px}}
+</style>
+</head>
+<body>
+
+<div id="cfg-modal" class="show">
+  <div class="mbox">
+    <h2>&#9881;&#65039; Supabase 연결 설정</h2>
+    <p>데이터를 여러 PC에서 동기화하려면 Supabase 프로젝트 정보를 입력하세요.<br>설정은 브라우저에 저장됩니다.</p>
+    <label>Supabase Project URL</label>
+    <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co" />
+    <label>Supabase Anon Key</label>
+    <input id="cfg-key" type="text" placeholder="eyJhbGci..." />
+    <button class="mbtn" id="btn-connect">연결하기</button>
+    <button class="mskip" id="btn-skip">나중에 설정 (로컬 전용으로 사용)</button>
+  </div>
+</div>
+
+<div id="pm-modal">
+  <div class="pmbox">
+    <h3>&#128218; 학습 기간 추가</h3>
+    <div class="pmf"><label>과목명</label><input id="pm-name" type="text" placeholder="예) 1과목: 행정법" /></div>
+    <div class="pmf"><label>시작일</label><input id="pm-start" type="date" /></div>
+    <div class="pmf"><label>종료일</label><input id="pm-end" type="date" /></div>
+    <div class="pmf"><label>색상</label><input id="pm-color" type="color" value="#2C5F8A" /></div>
+    <div class="pmbtns">
+      <button class="pmcancel" id="btn-pm-cancel">취소</button>
+      <button class="pmok" id="btn-pm-ok">추가</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">Study<span>.</span>Plan</div>
+  <nav>
+    <button class="nb active" id="btn-yearly">&#128197; 연간 목표</button>
+    <button class="nb" id="btn-exam">&#127919; 시험 플랜</button>
+  </nav>
+  <div class="hdr">
+    <span class="syncst"><span class="dot" id="sdot"></span><span id="slbl">로컬</span></span>
+    <button class="setbtn" id="btn-settings">&#9881;</button>
+  </div>
+</header>
+
+<div class="page active" id="page-yearly">
+  <div class="ph"><h1>연간 목표 &#128218;</h1><p>월별 학습 목표와 메모를 관리하세요.</p></div>
+  <div class="ybar"><select id="year-sel"><option value="2026">2026년</option><option value="2027">2027년</option></select></div>
+  <div class="mgrid" id="mgrid"></div>
+</div>
+
+<div class="page" id="page-exam">
+  <div class="ph"><h1>시험 플랜 &#127919;</h1><p>2027년 4월 시험까지의 학습 로드맵을 한눈에 파악하세요.</p></div>
+  <div class="emeta" id="emeta"></div>
+  <div class="tlhdr"><h2>&#128202; 학습 기간 타임라인</h2><button class="apbtn" id="btn-addperiod">+ 기간 추가</button></div>
+  <div class="tlwrap"><div style="position:relative;min-width:700px;">
+    <div class="ruler" id="ruler"></div>
+    <div id="bars"></div>
+  </div></div>
+  <div id="plist" style="margin-bottom:24px;"></div>
+  <div class="wsec">
+    <h2>&#128203; 주차별 학습 계획 <span style="font-size:.8rem;color:var(--text3);font-weight:400;">(현재 주 포함 이후 8주)</span></h2>
+    <div class="wgrid" id="wgrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">저장됨 &#10003;</div>
+
+<script>
+(function(){
+"use strict";
+var EXAM = new Date("2027-04-18");
+var MN = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+var sb = null;
+var S = {yearlyGoals:{},yearlyNotes:{},periods:[],weekTasks:{}};
+
+function initSB(url,key){
+  try{
+    sb = window.supabase.createClient(url,key);
+    setSync("ok","동기화됨");
+    loadSB();
+  }catch(e){setSync("err","연결 오류");}
+}
+function setSync(cls,txt){
+  document.getElementById("sdot").className="dot "+cls;
+  document.getElementById("slbl").textContent=txt;
+}
+async function loadSB(){
+  if(!sb)return;
+  try{
+    var r=await sb.from("planner_data").select("*").eq("user_id","default").single();
+    if(r.data&&r.data.payload){S=Object.assign({},S,JSON.parse(r.data.payload));renderAll();}
+  }catch(e){}
+}
+async function saveSB(){
+  if(!sb)return;
+  try{
+    await sb.from("planner_data").upsert({user_id:"default",payload:JSON.stringify(S),updated_at:new Date().toISOString()});
+    setSync("ok","동기화됨");
+  }catch(e){setSync("err","저장 실패");}
+}
+function saveL(){localStorage.setItem("ps",JSON.stringify(S));}
+function loadL(){try{var r=localStorage.getItem("ps");if(r)S=Object.assign({},S,JSON.parse(r));}catch(e){}}
+var st=null;
+function sched(){clearTimeout(st);st=setTimeout(function(){saveL();saveSB();toast();},800);}
+function toast(){var t=document.getElementById("toast");t.classList.add("show");setTimeout(function(){t.classList.remove("show");},1800);}
+
+// events
+document.getElementById("btn-connect").addEventListener("click",function(){
+  var url=document.getElementById("cfg-url").value.trim();
+  var key=document.getElementById("cfg-key").value.trim();
+  if(!url||!key){alert("URL과 Key를 모두 입력하세요.");return;}
+  localStorage.setItem("sb_url",url);localStorage.setItem("sb_key",key);
+  initSB(url,key);
+  document.getElementById("cfg-modal").classList.remove("show");
+});
+document.getElementById("btn-skip").addEventListener("click",function(){document.getElementById("cfg-modal").classList.remove("show");});
+document.getElementById("btn-settings").addEventListener("click",function(){
+  document.getElementById("cfg-url").value=localStorage.getItem("sb_url")||"";
+  document.getElementById("cfg-key").value=localStorage.getItem("sb_key")||"";
+  document.getElementById("cfg-modal").classList.add("show");
+});
+document.getElementById("btn-yearly").addEventListener("click",function(){
+  showPage("yearly");document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("active");});this.classList.add("active");
+});
+document.getElementById("btn-exam").addEventListener("click",function(){
+  showPage("exam");document.querySelectorAll(".nb").forEach(function(b){b.classList.remove("active");});this.classList.add("active");renderExam();
+});
+document.getElementById("year-sel").addEventListener("change",renderYearly);
+document.getElementById("btn-addperiod").addEventListener("click",function(){
+  document.getElementById("pm-name").value="";
+  document.getElementById("pm-start").value=new Date().toISOString().slice(0,10);
+  document.getElementById("pm-end").value="";
+  document.getElementById("pm-modal").classList.add("show");
+});
+document.getElementById("btn-pm-cancel").addEventListener("click",function(){document.getElementById("pm-modal").classList.remove("show");});
+document.getElementById("btn-pm-ok").addEventListener("click",function(){
+  var n=document.getElementById("pm-name").value.trim();
+  var s=document.getElementById("pm-start").value;
+  var e=document.getElementById("pm-end").value;
+  var c=document.getElementById("pm-color").value;
+  if(!n||!s||!e){alert("모든 항목을 입력하세요.");return;}
+  S.periods.push({id:"p"+Date.now(),name:n,start:s,end:e,color:c});
+  document.getElementById("pm-modal").classList.remove("show");
+  renderTL();renderPL();sched();
+});
+
+function showPage(n){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+  document.getElementById("page-"+n).classList.add("active");
+}
+
+// yearly
+function renderYearly(){
+  var year=parseInt(document.getElementById("year-sel").value);
+  var g=document.getElementById("mgrid");
+  var now=new Date();
+  g.innerHTML="";
+  for(var m=0;m<12;m++){
+    var k=year+"-"+m;
+    if(!S.yearlyGoals[k])S.yearlyGoals[k]=[];
+    if(!S.yearlyNotes[k])S.yearlyNotes[k]="";
+    var isc=(now.getFullYear()===year&&now.getMonth()===m);
+    var c=document.createElement("div");
+    c.className="mc"+(isc?" cur":"");
+    c.innerHTML="<div class=\"mh\"><span class=\"mn\">"+MN[m]+"</span>"+(isc?"<span class=\"mbadge\">이번달</span>":"")+"</div>"+
+      "<div class=\"glist\" id=\"gl-"+k+"\"></div>"+
+      "<button class=\"addbtn\" data-k=\""+k+"\">＋ 목표 추가</button>"+
+      "<div class=\"mprog\"><div class=\"mpbar\" id=\"pb-"+k+"\"></div></div>"+
+      "<div class=\"mnote\"><textarea placeholder=\"메모...\" rows=\"2\" id=\"nt-"+k+"\">"+S.yearlyNotes[k]+"</textarea></div>";
+    g.appendChild(c);
+    (function(key){
+      c.querySelector(".addbtn").addEventListener("click",function(){addGoal(key);});
+      c.querySelector("#nt-"+key).addEventListener("input",function(){S.yearlyNotes[key]=this.value;sched();});
+    })(k);
+    renderGoals(k);
+  }
+}
+
+function renderGoals(k){
+  var ct=document.getElementById("gl-"+k);if(!ct)return;
+  ct.innerHTML="";
+  var gs=S.yearlyGoals[k]||[];
+  gs.forEach(function(g,i){
+    var r=document.createElement("div");r.className="gi";
+    r.innerHTML="<input type=\"checkbox\" class=\"gck\""+( g.done?" checked":"")+">"+
+      "<textarea class=\"gt"+(g.done?" done":"")+"\" rows=\"1\">"+g.text+"</textarea>"+
+      "<button class=\"dbtn\">&#10005;</button>";
+    ct.appendChild(r);
+    (function(key,idx){
+      r.querySelector(".gck").addEventListener("change",function(){toggleGoal(key,idx,this.checked);});
+      var ta=r.querySelector("textarea");
+      ta.addEventListener("input",function(){if(S.yearlyGoals[key]&&S.yearlyGoals[key][idx]!==undefined)S.yearlyGoals[key][idx].text=this.value;});
+      ta.addEventListener("blur",sched);
+      r.querySelector(".dbtn").addEventListener("click",function(){S.yearlyGoals[key].splice(idx,1);renderGoals(key);sched();});
+    })(k,i);
+  });
+  updProg(k);
+}
+
+function addGoal(k){
+  S.yearlyGoals[k].push({text:"",done:false});renderGoals(k);sched();
+  var c=document.getElementById("gl-"+k);var ts=c.querySelectorAll("textarea");if(ts.length)ts[ts.length-1].focus();
+}
+function toggleGoal(k,i,v){
+  S.yearlyGoals[k][i].done=v;
+  var c=document.getElementById("gl-"+k);var ts=c.querySelectorAll("textarea");
+  if(ts[i])ts[i].className="gt"+(v?" done":"");
+  updProg(k);sched();
+}
+function updProg(k){
+  var gs=S.yearlyGoals[k]||[];var d=gs.filter(function(g){return g.done;}).length;
+  var p=gs.length?Math.round(d/gs.length*100):0;
+  var b=document.getElementById("pb-"+k);if(b)b.style.width=p+"%";
+}
+
+// exam
+function renderExam(){renderMeta();renderTL();renderPL();renderWeeks();}
+function renderMeta(){
+  var now=new Date();var diff=Math.ceil((EXAM-now)/86400000);
+  var weeks=Math.floor(diff/7);var months=Math.round(diff/30.44);
+  var pct=Math.max(0,Math.min(100,Math.round((1-diff/Math.ceil((EXAM-new Date("2026-01-01"))/86400000))*100)));
+  document.getElementById("emeta").innerHTML=
+    "<div class=\"emc\"><div class=\"elabel\">D-DAY</div><div class=\"eval"+(diff<60?" warn":"")+"\" style=\"font-size:2rem;\">D-"+diff+"</div><div class=\"esub\">2027년 4월 18일 시험</div></div>"+
+    "<div class=\"emc\"><div class=\"elabel\">남은 기간</div><div class=\"eval\">"+weeks+"<span style=\"font-size:.9rem;color:var(--text2);\">주</span></div><div class=\"esub\">약 "+months+"개월</div></div>"+
+    "<div class=\"emc\"><div class=\"elabel\">진행률</div><div class=\"eval ok\">"+pct+"<span style=\"font-size:.9rem\">%</span></div><div class=\"esub\">2026.01 기준</div></div>"+
+    "<div class=\"emc\"><div class=\"elabel\">오늘</div><div class=\"eval\" style=\"font-size:1.1rem;margin-top:4px;\">"+now.getFullYear()+"."+String(now.getMonth()+1).padStart(2,"0")+"."+String(now.getDate()).padStart(2,"0")+"</div><div class=\"esub\">"+["일","월","화","수","목","금","토"][now.getDay()]+"요일</div></div>";
+}
+function renderTL(){
+  var start=new Date("2026-01-01");var total=EXAM-start;var now=new Date();
+  var months=[];var cur=new Date(start);
+  while(cur<=EXAM){months.push(new Date(cur));cur.setMonth(cur.getMonth()+1);}
+  var ruler=document.getElementById("ruler");ruler.innerHTML="";
+  months.forEach(function(m){
+    var d=document.createElement("div");d.className="rc";
+    if(m.getFullYear()===now.getFullYear()&&m.getMonth()===now.getMonth())d.className+=" cur";
+    if(m.getFullYear()===2027&&m.getMonth()===3)d.className+=" exam";
+    d.textContent=(m.getFullYear()===2027?"27":"26")+"."+String(m.getMonth()+1).padStart(2,"0");
+    ruler.appendChild(d);
+  });
+  var tp=Math.max(0,Math.min(100,((now-start)/total)*100));
+  var bars=document.getElementById("bars");bars.innerHTML="";
+  var ps=S.periods.length>0?S.periods:[
+    {id:"d1",name:"1회독",start:"2026-01-01",end:"2026-06-30",color:"#2C5F8A"},
+    {id:"d2",name:"2회독+문제풀이",start:"2026-07-01",end:"2026-11-30",color:"#C4873A"},
+    {id:"d3",name:"파이널",start:"2026-12-01",end:"2027-04-17",color:"#5A8A6A"},
+  ];
+  ps.forEach(function(p){
+    var ps2=new Date(p.start),pe=new Date(p.end);
+    var l=Math.max(0,((ps2-start)/total)*100);
+    var r2=Math.min(100,((pe-start)/total)*100);
+    var w=Math.max(1,r2-l);
+    var row=document.createElement("div");row.className="brow";
+    row.innerHTML="<div class=\"plbl\">"+p.name+"</div><div class=\"btrack\">"+
+      "<div class=\"bfill\" style=\"left:"+l+"%;width:"+w+"%;background:"+p.color+";\">"+(w>8?p.name:"")+"</div>"+
+      "<div class=\"todayline\" style=\"left:"+tp+"%\"><span class=\"todaylbl\">오늘</span></div></div>";
+    bars.appendChild(row);
+  });
+}
+function renderPL(){
+  var sec=document.getElementById("plist");
+  if(!S.periods.length){sec.innerHTML="";return;}
+  var h="<div style=\"background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);\"><div style=\"font-size:.85rem;font-weight:800;margin-bottom:12px;\">등록된 학습 기간</div>";
+  S.periods.forEach(function(p){
+    h+="<div style=\"display:flex;align-items:center;gap:8px;margin-bottom:6px;\">"+
+      "<span style=\"width:12px;height:12px;border-radius:3px;background:"+p.color+";display:inline-block;flex-shrink:0;\"></span>"+
+      "<span style=\"flex:1;font-size:.82rem;\">"+p.name+" <span style=\"color:var(--text3);font-size:.75rem;font-family:DM Mono,monospace;\">"+p.start+" ~ "+p.end+"</span></span>"+
+      "<button class=\"dbtn\" data-pid=\""+p.id+"\">&#10005;</button></div>";
+  });
+  h+="</div>";sec.innerHTML=h;
+  sec.querySelectorAll(".dbtn").forEach(function(b){
+    b.addEventListener("click",function(){
+      S.periods=S.periods.filter(function(p){return p.id!==b.dataset.pid;});
+      renderTL();renderPL();sched();
+    });
+  });
+}
+function wkey(d){
+  var x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-(x.getDay()===0?6:x.getDay()-1));
+  return "w"+x.getFullYear()+String(x.getMonth()+1).padStart(2,"0")+String(x.getDate()).padStart(2,"0");
+}
+function renderWeeks(){
+  var g=document.getElementById("wgrid");g.innerHTML="";
+  var now=new Date();var mon=new Date(now);
+  mon.setDate(mon.getDate()-(mon.getDay()===0?6:mon.getDay()-1));
+  for(var w=0;w<8;w++){
+    var ws=new Date(mon);ws.setDate(mon.getDate()+w*7);
+    var we=new Date(ws);we.setDate(ws.getDate()+6);
+    var k=wkey(ws);
+    if(!S.weekTasks[k])S.weekTasks[k]=[];
+    var fmt=function(d){return(d.getMonth()+1)+"/"+d.getDate();};
+    var card=document.createElement("div");
+    card.className="wc"+(w===0?" tw":"");
+    card.innerHTML="<div class=\"wch\"><span class=\"wct\">"+(w+1)+"주차"+(w===0?" &#128204;":"")+"</span><span class=\"wcd\">"+fmt(ws)+" ~ "+fmt(we)+"</span></div>"+
+      "<div class=\"wtlist\" id=\"wt-"+k+"\"></div>"+
+      "<button class=\"waddbtn\" data-k=\""+k+"\">＋ 할 일 추가</button>";
+    g.appendChild(card);
+    (function(key){card.querySelector(".waddbtn").addEventListener("click",function(){addWT(key);});})(k);
+    renderWT(k);
+  }
+}
+function renderWT(k){
+  var ct=document.getElementById("wt-"+k);if(!ct)return;ct.innerHTML="";
+  var ts=S.weekTasks[k]||[];
+  ts.forEach(function(t,i){
+    var r=document.createElement("div");r.className="wti";
+    r.innerHTML="<input type=\"checkbox\" class=\"tck\""+( t.done?" checked":"")+">"+ 
+      "<textarea class=\"tt"+(t.done?" done":"")+"\" rows=\"1\">"+t.text+"</textarea>"+
+      "<button class=\"dbtn\">&#10005;</button>";
+    ct.appendChild(r);
+    (function(key,idx){
+      r.querySelector(".tck").addEventListener("change",function(){
+        S.weekTasks[key][idx].done=this.checked;
+        var ta=r.querySelector("textarea");if(ta)ta.className="tt"+(this.checked?" done":"");sched();
+      });
+      var ta=r.querySelector("textarea");
+      ta.addEventListener("input",function(){if(S.weekTasks[key]&&S.weekTasks[key][idx]!==undefined)S.weekTasks[key][idx].text=this.value;});
+      ta.addEventListener("blur",sched);
+      r.querySelector(".dbtn").addEventListener("click",function(){S.weekTasks[key].splice(idx,1);renderWT(key);sched();});
+    })(k,i);
+  });
+}
+function addWT(k){
+  if(!S.weekTasks[k])S.weekTasks[k]=[];
+  S.weekTasks[k].push({text:"",done:false});renderWT(k);sched();
+  var c=document.getElementById("wt-"+k);var ts=c.querySelectorAll("textarea");if(ts.length)ts[ts.length-1].focus();
+}
+
+function renderAll(){renderYearly();}
+
+// init
+loadL();
+var u=localStorage.getItem("sb_url"),k=localStorage.getItem("sb_key");
+if(u&&k){document.getElementById("cfg-modal").classList.remove("show");initSB(u,k);}
+renderAll();
+})();
+</script>
+</body>
+</html>
